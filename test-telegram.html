@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Telegram WebApp</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .button {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Тест Telegram WebApp</h1>
+    
+    <div id="status" class="status info">Проверка окружения...</div>
+    
+    <div>
+        <button class="button" onclick="checkEnvironment()">Проверить окружение</button>
+        <button class="button" onclick="testAlert()">Тест Alert</button>
+        <button class="button" onclick="testTheme()">Тест темы</button>
+        <button class="button" onclick="testAPI()">Тест API</button>
+    </div>
+    
+    <div id="userInfo"></div>
+    <div id="themeInfo"></div>
+    <div id="apiResult"></div>
+
+    <script>
+        const API_URL = 'http://192.168.0.102:5000/api';
+        
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+        
+        function checkEnvironment() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const webApp = window.Telegram.WebApp;
+                
+                updateStatus('Telegram WebApp обнаружен!', 'success');
+                
+                // Инициализация
+                webApp.ready();
+                webApp.expand();
+                
+                // Информация о пользователе
+                const user = webApp.initDataUnsafe.user;
+                if (user) {
+                    document.getElementById('userInfo').innerHTML = `
+                        <h3>Пользователь:</h3>
+                        <p>ID: ${user.id}</p>
+                        <p>Имя: ${user.first_name} ${user.last_name || ''}</p>
+                        <p>Username: ${user.username || 'нет'}</p>
+                    `;
+                } else {
+                    document.getElementById('userInfo').innerHTML = '<p>Пользователь не найден</p>';
+                }
+                
+                // Информация о теме
+                const theme = webApp.themeParams;
+                document.getElementById('themeInfo').innerHTML = `
+                    <h3>Тема:</h3>
+                    <p>Цветовая схема: ${webApp.colorScheme}</p>
+                    <p>Фон: ${theme.bg_color || 'default'}</p>
+                    <p>Текст: ${theme.text_color || 'default'}</p>
+                `;
+                
+                return true;
+            } else {
+                updateStatus('Telegram WebApp не обнаружен. Откройте в Telegram.', 'error');
+                return false;
+            }
+        }
+        
+        function testAlert() {
+            if (checkEnvironment()) {
+                const webApp = window.Telegram.WebApp;
+                if (webApp.showAlert) {
+                    webApp.showAlert('Тестовое сообщение из WebApp!');
+                } else {
+                    alert('WebApp showAlert не поддерживается');
+                }
+            } else {
+                alert('Это обычный alert для теста');
+            }
+        }
+        
+        function testTheme() {
+            if (checkEnvironment()) {
+                const webApp = window.Telegram.WebApp;
+                
+                // Применяем цвета темы
+                if (webApp.themeParams.bg_color) {
+                    document.body.style.backgroundColor = webApp.themeParams.bg_color;
+                }
+                if (webApp.themeParams.text_color) {
+                    document.body.style.color = webApp.themeParams.text_color;
+                }
+                
+                updateStatus('Тема применена!', 'success');
+            }
+        }
+        
+        async function testAPI() {
+            try {
+                updateStatus('Тест API...', 'info');
+                
+                // Тест health endpoint
+                const healthResponse = await fetch(`${API_URL}/../health`);
+                const health = await healthResponse.json();
+                
+                // Тест toilets endpoint
+                const toiletsResponse = await fetch(`${API_URL}/toilets`);
+                const toilets = await toiletsResponse.json();
+                
+                document.getElementById('apiResult').innerHTML = `
+                    <h3>API Результаты:</h3>
+                    <p>Health: ${health.status}</p>
+                    <p>Toilets: ${toilets.data?.length || 0} точек</p>
+                `;
+                
+                updateStatus('API работает!', 'success');
+            } catch (error) {
+                document.getElementById('apiResult').innerHTML = `
+                    <h3>API Ошибка:</h3>
+                    <p>${error.message}</p>
+                `;
+                updateStatus('API ошибка!', 'error');
+            }
+        }
+        
+        // Автоматическая проверка при загрузке
+        window.onload = function() {
+            setTimeout(checkEnvironment, 1000);
+        };
+    </script>
+</body>
+</html>

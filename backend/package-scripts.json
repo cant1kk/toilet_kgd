@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "change-password": "ts-node -e \"import('./src/change-password').then(m => m.changePassword('admin', 'newPassword123'))\""
+  }
+}
