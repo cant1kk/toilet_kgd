@@ -1,0 +1,81 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.seedData = void 0;
+const database_1 = require("./database");
+const seedData = async () => {
+    console.log('Adding sample toilets...');
+    const sampleToilets = [
+        {
+            name: 'Туалет в ТЦ "Европа"',
+            address: 'ул. Ленинский проспект, 49',
+            latitude: 54.7104,
+            longitude: 20.5116,
+            type: 'free',
+            price: null,
+            description: 'Чистый туалет на 1 этаже торгового центра',
+            approved: 1
+        },
+        {
+            name: 'Платный туалет на Железнодорожном вокзале',
+            address: 'пл. Привокзальная, 1',
+            latitude: 54.7128,
+            longitude: 20.5069,
+            type: 'paid',
+            price: '50 рублей',
+            description: 'Работает круглосуточно',
+            approved: 1
+        },
+        {
+            name: 'Туалет в McDonald\'s',
+            address: 'ул. Кирова, 3',
+            latitude: 54.7089,
+            longitude: 20.5128,
+            type: 'purchase_required',
+            price: 'Покупка от 100 рублей',
+            description: 'Код от двери в чеке',
+            approved: 1
+        },
+        {
+            name: 'Общественный туалет в парке',
+            address: 'ул. Театральная, 1',
+            latitude: 54.7098,
+            longitude: 20.5145,
+            type: 'free',
+            price: null,
+            description: 'Работает с 8:00 до 20:00',
+            approved: 1
+        },
+        {
+            name: 'Туалет в ТЦ "Калининград Плазма"',
+            address: 'ул. Октябрьская, 4',
+            latitude: 54.7071,
+            longitude: 20.5234,
+            type: 'free',
+            price: null,
+            description: 'На каждом этаже',
+            approved: 1
+        }
+    ];
+    for (const toilet of sampleToilets) {
+        await (0, database_1.runQuery)(`INSERT INTO toilets (name, address, latitude, longitude, type, price, description, approved)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [toilet.name, toilet.address, toilet.latitude, toilet.longitude, toilet.type, toilet.price, toilet.description, toilet.approved]);
+    }
+    console.log('Sample toilets added successfully!');
+};
+exports.seedData = seedData;
+// Run if this file is executed directly
+if (require.main === module) {
+    const { initDatabase } = require('./database');
+    initDatabase().then(() => {
+        seedData().then(() => {
+            console.log('Database seeded successfully');
+            process.exit(0);
+        }).catch((err) => {
+            console.error('Error seeding database:', err);
+            process.exit(1);
+        });
+    }).catch((err) => {
+        console.error('Error initializing database:', err);
+        process.exit(1);
+    });
+}
