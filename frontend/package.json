@@ -1,0 +1,66 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@tanstack/react-query": "^5.8.4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@twa-dev/sdk": "^8.0.2",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.126",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "axios": "^1.12.2",
+    "bootstrap": "^5.3.8",
+    "leaflet": "^1.9.4",
+    "lodash.debounce": "^4.0.8",
+    "lucide-react": "^0.545.0",
+    "react": "^19.2.0",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "^19.2.0",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.9.4",
+    "react-scripts": "5.0.1",
+    "react-window": "^1.8.8",
+    "react-window-infinite-loader": "^1.0.9",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "analyze": "npm run build && npx webpack-bundle-analyzer build/static/js/*.js",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.20",
+    "@types/lodash.debounce": "^4.0.9",
+    "@types/react-window": "^1.8.8",
+    "gh-pages": "^6.1.1",
+    "webpack-bundle-analyzer": "^4.10.1"
+  }
+}

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#007bff" />
+    <meta
+      name="description"
+      content="Найдите ближайшие общественные туалеты в Калининграде. Бесплатные, платные и туалеты за покупку."
+    />
+    <meta name="keywords" content="туалеты, калининград, карта, общественные туалеты, туалет, wc, telegram webapp" />
+    <meta name="author" content="Toilet Finder Kaliningrad" />
+    
+    <!-- Open Graph для социальных сетей -->
+    <meta property="og:title" content="Карта туалетов Калининграда" />
+    <meta property="og:description" content="Найдите ближайшие общественные туалеты в Калининграде" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
+    <meta property="og:site_name" content="Туалеты Кgd" />
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="%PUBLIC_URL%/logo512.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Мета-теги для мобильных устройств -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Туалеты Кgd" />
+    <meta name="application-name" content="Туалеты Кgd" />
+    
+    <!-- Мета-теги для геолокации -->
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    
+    <!-- Предотвращение масштабирования -->
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Telegram WebApp оптимизации -->
+    <meta name="telegram:web-app" content="yes" />
+    
+    <!-- Заголовок -->
+    <title>Карта туалетов Калининграда</title>
+    
+    <!-- Предзагрузка критических ресурсов -->
+    <link rel="preconnect" href="https://api.telegram.org" />
+    <link rel="preconnect" href="https://tile.openstreetmap.org" />
+    <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org" />
+    
+    <style>
+      /* Критические стили для быстрой загрузки */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: #ffffff;
+        color: #000000;
+      }
+      
+      /* Предotвращение мерцания при загрузке */
+      #root {
+        min-height: 100vh;
+      }
+      
+      /* Оптимизация для Telegram WebApp */
+      .telegram-web-app {
+        height: 100vh;
+        overflow: hidden;
+      }
+      
+      /* Темная тема по умолчанию для системных настроек */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1f1f1f;
+          color: #ffffff;
+        }
+      }
+      
+      /* Индикатор загрузки */
+      .loading-spinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+      
+      .loading-spinner::after {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Telegram WebApp переменные */
+      :root {
+        --tg-bg-color: #ffffff;
+        --tg-text-color: #000000;
+        --tg-hint-color: #999999;
+        --tg-button-color: #007bff;
+        --tg-button-text-color: #ffffff;
+        --tg-viewport-height: 100vh;
+        --tg-viewport-stable: true;
+      }
+
+      /* Адаптация для безопасных зон */
+      @supports (padding: max(0px)) {
+        body {
+          padding-top: env(safe-area-inset-top);
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>Для работы приложения необходимо включить JavaScript.</noscript>
+    <div id="root">
+      <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Инициализация Telegram WebApp -->
+    <script>
+      // Глобальная переменная для Telegram WebApp
+      window.Telegram = window.Telegram || {};
+      
+      // Инициализация при загрузке
+      window.addEventListener('load', function() {
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.ready();
+          window.Telegram.WebApp.expand();
+        }
+      });
+    </script>
+  </body>
+</html>

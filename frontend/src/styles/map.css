@@ -1,0 +1,222 @@
+/* Стили для карты */
+
+.map-page {
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+}
+
+.map-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.telegram-map .map-container {
+  height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+
+/* Загрузка карты */
+.map-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 1000;
+}
+
+.map-loading .spinner-border {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Ошибка загрузки */
+.map-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 1000;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+/* Всплывающие окна маркеров */
+.toilet-popup {
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.toilet-popup h6 {
+  margin-bottom: 0.5rem;
+  color: var(--tg-text-color, #000000);
+}
+
+.toilet-popup p {
+  font-size: 0.9rem;
+  color: var(--tg-text-color, #000000);
+}
+
+.toilet-popup .badge {
+  font-size: 0.8rem;
+}
+
+/* Оптимизация для мобильных устройств */
+@media (max-width: 768px) {
+  .map-page {
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  .toilet-popup {
+    min-width: 150px;
+    max-width: 250px;
+  }
+}
+
+/* Темная тема для карты */
+[data-theme="dark"] .toilet-popup h6 {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .toilet-popup p {
+  color: #ffffff;
+}
+
+/* Улучшение производительности */
+.leaflet-container {
+  will-change: transform;
+}
+
+.leaflet-marker-icon {
+  will-change: transform;
+}
+
+/* Анимация появления маркеров */
+.leaflet-marker-icon {
+  animation: markerFadeIn 0.3s ease-out;
+}
+
+@keyframes markerFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Стили для легенды */
+.legend-container {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.telegram-app .legend-container {
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  background: var(--tg-bg-color, rgba(255, 255, 255, 0.9));
+  color: var(--tg-text-color, #000000);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.legend-icon.free {
+  background-color: #28a745;
+}
+
+.legend-icon.paid {
+  background-color: #dc3545;
+}
+
+.legend-icon.purchase-required {
+  background-color: #ffc107;
+}
+
+.legend-icon.user {
+  background-color: #007bff;
+}
+
+/* Адаптивность для маленьких экранов */
+@media (max-width: 480px) {
+  .legend-container {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 8px;
+  }
+  
+  .legend-item {
+    font-size: 0.8rem;
+    margin-bottom: 3px;
+  }
+  
+  .legend-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+  }
+}
+
+/* Темная тема для легенды */
+[data-theme="dark"] .legend-container {
+  background: rgba(31, 31, 31, 0.9);
+  color: #ffffff;
+}
+
+/* Стили для кнопок управления картой */
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: var(--tg-bg-color, #ffffff) !important;
+  color: var(--tg-text-color, #000000) !important;
+  border: 1px solid var(--tg-hint-color, #cccccc) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: var(--tg-button-color, #007bff) !important;
+  color: var(--tg-button-text-color, #ffffff) !important;
+}
+
+/* Оптимизация для тач-устройств */
+@media (pointer: coarse) {
+  .leaflet-control-zoom {
+    transform: scale(1.2);
+  }
+  
+  .leaflet-control-zoom a {
+    width: 40px !important;
+    height: 40px !important;
+    line-height: 40px !important;
+  }
+}
