@@ -11,6 +11,7 @@ import Navigation from './components/Navigation';
 import { GeolocationHandler } from './components/GeolocationHandler';
 import { SimpleMapTest } from './components/SimpleMapTest';
 import { BasicTest } from './components/BasicTest';
+import { EnvironmentCheck } from './components/EnvironmentCheck';
 import { telegramService } from './services/telegram';
 
 // Объявление типов для Telegram WebApp API
@@ -96,7 +97,7 @@ function AppContent() {
       <Routes>
         <Route 
           path="/" 
-          element={<BasicTest />} 
+          element={<EnvironmentCheck />} 
         />
         <Route 
           path="/admin" 
