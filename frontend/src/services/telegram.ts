@@ -381,58 +381,78 @@ class TelegramService {
         return;
       }
 
+      console.log('Requesting geolocation in Telegram WebApp...');
+      
       const options = {
         enableHighAccuracy: true,
         timeout: 30000,
         maximumAge: 600000
       };
 
-      navigator.geolocation.getCurrentPosition(
-        resolve,
-        reject,
-        options
-      );
+      // Показываем индикатор загрузки
+      this.setMainButtonParams({
+        text: '📍 Поиск...',
+        color: '#6c757d'
+      });
+      
+      const successCallback = (position: GeolocationPosition) => {
+        console.log('Geolocation success:', position);
+        resolve(position);
+      };
+
+      const errorCallback = (error: GeolocationPositionError) => {
+        console.error('Geolocation error:', error);
+        reject(error);
+      };
+
+      navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
     });
   }
 
   // Проверка доступности геолокации
   isGeolocationAvailable(): boolean {
-    return !!navigator.geolocation;
+    const available = !!navigator.geolocation;
+    console.log('Geolocation available:', available);
+    return available;
   }
 
   // Показать кнопку для запроса геолокации
   showGeolocationButton(callback: () => void) {
     if (this.isInitialized && WebApp.MainButton) {
+      console.log('Showing geolocation button');
       this.setMainButtonParams({
         text: '📍 Определить местоположение',
         color: '#007bff'
       });
       
       this.setMainButtonCallback(() => {
+        console.log('Geolocation button clicked');
         callback();
-        // Скрываем кнопку после использования
-        setTimeout(() => {
-          this.hideMainButton();
-        }, 2000);
       });
       
       this.showMainButton();
+    } else {
+      console.warn('Telegram WebApp not initialized or MainButton not available');
     }
   }
 
   // Показать кнопку повторного запроса геолокации
   showRetryGeolocationButton(callback: () => void) {
     if (this.isInitialized && WebApp.MainButton) {
+      console.log('Showing retry geolocation button');
       this.setMainButtonParams({
         text: '🔄 Попробовать снова',
         color: '#dc3545'
       });
       
       this.setMainButtonCallback(() => {
+        console.log('Retry button clicked');
         callback();
       });
       
       this.showMainButton();
+    } else {
+      console.warn('Telegram WebApp not initialized or MainButton not available');
     }
   }
 }

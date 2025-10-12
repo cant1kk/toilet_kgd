@@ -49,33 +49,43 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
 
   const requestLocationWithTelegramButton = () => {
     if (telegramService.isTelegramApp()) {
+      // Показываем инструкцию сначала
+      telegramService.showAlert(
+        'Для определения вашего местоположения нажмите на синюю кнопку внизу экрана. Это поможет нам показать ближайшие туалеты.'
+      );
+      
       // Используем новый метод для показа кнопки геолокации
       telegramService.showGeolocationButton(() => {
+        console.log('Telegram main button clicked - requesting geolocation');
         requestLocation();
       });
-      
-      // Показываем инструкцию
-      telegramService.showAlert(
-        'Нажмите на синюю кнопку внизу "📍 Определить местоположение", чтобы мы могли показать ближайшие туалеты.'
-      );
     } else {
       requestLocation();
     }
   };
 
   const requestLocation = async () => {
+    console.log('Starting geolocation request...');
+    
     if (!telegramService.isGeolocationAvailable()) {
-      setError('Ваш браузер не поддерживает геолокацию');
+      const errorMsg = 'Ваш браузер не поддерживает геолокацию';
+      setError(errorMsg);
       setShowPermissionPrompt(true);
+      
+      if (telegramService.isTelegramApp()) {
+        telegramService.showAlert(errorMsg);
+      }
       return;
     }
 
     setIsLoading(true);
     setError('');
+    console.log('Geolocation is available, requesting position...');
 
     try {
       // Используем специальный метод для Telegram
       const position = await telegramService.requestGeolocation();
+      console.log('Geolocation successful:', position);
       handleLocationUpdate(position);
       setIsLoading(false);
       setShowPermissionPrompt(false);
@@ -85,12 +95,14 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
         telegramService.hideMainButton();
       }
     } catch (error: any) {
+      console.error('Geolocation failed:', error);
       handleLocationError(error);
       setIsLoading(false);
       
       // В Telegram показываем кнопку повторного запроса при ошибке
       if (telegramService.isTelegramApp()) {
         telegramService.showRetryGeolocationButton(() => {
+          console.log('Retry button clicked - requesting geolocation again');
           requestLocation();
         });
       }
@@ -98,13 +110,16 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
   };
 
   useEffect(() => {
+    // Проверяем поддержку геолокации
     if (!navigator.geolocation) {
       setError('Ваш браузер не поддерживает геолокацию');
       setShowPermissionPrompt(true);
       return;
     }
 
+    // Для Telegram WebApp сразу показываем кнопку запроса
     if (telegramService.isTelegramApp()) {
+      console.log('Telegram WebApp detected, showing geolocation button');
       setTimeout(() => {
         requestLocationWithTelegramButton();
         setHasBeenShown(true);
@@ -112,6 +127,7 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
       return;
     }
 
+    // Для обычного браузера проверяем разрешения
     if ('permissions' in navigator) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         if (result.state === 'granted') {
@@ -138,7 +154,7 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
         }, 1500);
       }
     }
-  }, [hasBeenShown]);
+  }, [hasBeenShown, telegramService.isTelegramApp()]);
 
   const getBrowserInstructions = () => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -168,7 +184,7 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
       return {
         title: 'Firefox',
         steps: [
-          'Нажмите на иконку замка слева от адресной строки',
+          'Нажмите на иконку замка слева от地址ной строки',
           'В разделе "Разрешения" найдите "Доступ к вашему местоположению"',
           'Измените на "Разрешить"',
           'Обновите страницу'

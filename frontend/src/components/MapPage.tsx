@@ -6,6 +6,7 @@ import { toiletAPI } from '../services/api';
 import { Toilet } from '../types';
 import { telegramService } from '../services/telegram';
 import { useTelegramAuth } from '../hooks/useTelegramAuth';
+import TelegramGeolocationDebug from './TelegramGeolocationDebug';
 import AddToiletModal from './AddToiletModal';
 import Legend from './Legend';
 import '../styles/map.css';
@@ -143,7 +144,7 @@ const MapPage: React.FC<MapPageProps> = ({ initialUserLocation, isTelegram }) =>
         telegramService.showAlert('Точка успешно добавлена и будет проверена модератором');
         telegramService.notificationOccurred('success');
       } else {
-        alert('Точка успешно добавлена и будет проверена модератором');
+        alert('Точка successfully добавлена и будет проверена модератором');
       }
     } catch (err) {
       console.error('Error adding toilet:', err);
@@ -226,6 +227,13 @@ const MapPage: React.FC<MapPageProps> = ({ initialUserLocation, isTelegram }) =>
 
   return (
     <div className={`map-page ${isTelegram ? 'telegram-map' : ''}`}>
+      {/* Отладочный компонент для Telegram */}
+      {isTelegram && process.env.NODE_ENV === 'development' && (
+        <TelegramGeolocationDebug onLocationFound={(lat: number, lon: number) => {
+          setUserLocation({ lat, lon });
+        }} />
+      )}
+      
       <MapContainer
         center={getMapCenter()}
         zoom={13}
@@ -307,6 +315,15 @@ const MapPage: React.FC<MapPageProps> = ({ initialUserLocation, isTelegram }) =>
         initialPosition={selectedPosition}
         isTelegram={isTelegram}
       />
+
+      {/* Отладочная информация для геолокации в Telegram */}
+      {isTelegram && (
+        <TelegramGeolocationDebug 
+          onLocationFound={(lat: number, lon: number) => {
+            setUserLocation({ lat, lon });
+          }} 
+        />
+      )}
     </div>
   );
 };
