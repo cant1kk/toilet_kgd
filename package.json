@@ -10,8 +10,10 @@
     "dev:frontend": "cd frontend && npm start",
     "dev:network": "concurrently \"npm run dev:backend\" \"npm run dev:frontend:network\"",
     "dev:frontend:network": "cd frontend && cross-env HOST=0.0.0.0 npm start",
-    "build": "cd backend && npm run build && cd ../frontend && npm run build",
-    "start": "cd backend && npm start"
+    "build": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start": "cd backend && npm start",
+    "vercel-build": "cd frontend && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
