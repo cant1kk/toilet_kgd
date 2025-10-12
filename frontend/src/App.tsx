@@ -4,13 +4,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 import './styles/mobile.css';
+
 import MapPage from './components/MapPage';
 import AdminPanel from './components/AdminPanel';
 import Navigation from './components/Navigation';
 import { GeolocationHandler } from './components/GeolocationHandler';
 import { SimpleMapTest } from './components/SimpleMapTest';
 import { BasicTest } from './components/BasicTest';
-import { telegramService } from '../services/telegram';
+import { telegramService } from './services/telegram';
 
 // Объявление типов для Telegram WebApp API
 declare global {
