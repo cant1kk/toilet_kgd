@@ -103,8 +103,10 @@ class TelegramService {
       console.log('Geolocation is supported in this Telegram WebApp');
       
       // Проверяем HTTPS
-      if (location.protocol === 'https:' || location.hostname === 'localhost') {
+      if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
         console.log('Secure context detected - geolocation should work');
+      } else if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        console.log('Localhost detected - geolocation should work');
       } else {
         console.warn('Insecure context - geolocation may not work');
       }
