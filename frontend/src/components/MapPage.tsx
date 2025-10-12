@@ -208,6 +208,11 @@ const MapPage: React.FC<MapPageProps> = ({ initialUserLocation, isTelegram }) =>
           <span className="visually-hidden">Загрузка...</span>
         </div>
         <p>Загрузка карты...</p>
+        {isTelegram && (
+          <div className="mt-3 p-3 bg-blue-100 rounded">
+            <small>Telegram WebApp detected, loading map...</small>
+          </div>
+        )}
       </div>
     );
   }
@@ -227,19 +232,46 @@ const MapPage: React.FC<MapPageProps> = ({ initialUserLocation, isTelegram }) =>
 
   return (
     <div className={`map-page ${isTelegram ? 'telegram-map' : ''}`}>
+      {/* Отладочная информация */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="position-absolute top-0 start-0 z-50 bg-white p-2 m-2 rounded shadow" style={{zIndex: 9999}}>
+          <small className="d-block">
+            Telegram: {isTelegram ? '✅' : '❌'}
+          </small>
+          <small className="d-block">
+            User Location: {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lon.toFixed(4)}` : '❌'}
+          </small>
+          <small className="d-block">
+            Toilets: {toilets.length}
+          </small>
+          <small className="d-block">
+            Loading: {loading ? '✅' : '❌'}
+          </small>
+        </div>
+      )}
+      
       {/* Отладочный компонент для Telegram */}
       {isTelegram && process.env.NODE_ENV === 'development' && (
-        <TelegramGeolocationDebug onLocationFound={(lat: number, lon: number) => {
-          setUserLocation({ lat, lon });
-        }} />
+        <TelegramGeolocationDebug 
+          onLocationFound={(lat: number, lon: number) => {
+            setUserLocation({ lat, lon });
+          }} 
+        />
       )}
       
       <MapContainer
         center={getMapCenter()}
         zoom={13}
         className="map-container"
-        bounds={getMapBounds() || undefined}
-        boundsOptions={{ padding: [50, 50] }}
+        style={{ height: '100vh', width: '100vw', zIndex: 1 }}
+                whenReady={() => {
+          console.log('Map created successfully');
+          if (isTelegram) {
+            setTimeout(() => {
+              // Используем useMapEvents или другой способ для доступа к карте
+            }, 1000);
+          }
+        }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
