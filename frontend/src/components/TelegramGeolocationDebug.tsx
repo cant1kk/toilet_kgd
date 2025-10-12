@@ -38,10 +38,10 @@ export function TelegramGeolocationDebug({ onLocationFound }: TelegramGeolocatio
     addDebugInfo('✅ Геолокация поддерживается');
     
     // Проверяем HTTPS
-    if (location.protocol === 'https:') {
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
       addDebugInfo('✅ HTTPS соединение');
     } else {
-      addDebugInfo('⚠️ Небезопасное соединение (не HTTPS)');
+      addDebugInfo('⚠️ Небезопасное соединие (не HTTPS)');
     }
     
     // Пытаемся получить геолокацию
