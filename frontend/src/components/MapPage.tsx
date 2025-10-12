@@ -6,7 +6,7 @@ import { toiletAPI } from '../services/api';
 import { Toilet } from '../types';
 import { telegramService } from '../services/telegram';
 import { useTelegramAuth } from '../hooks/useTelegramAuth';
-import TelegramGeolocationDebug from './TelegramGeolocationDebug';
+import { TelegramGeolocationDebug } from './TelegramGeolocationDebug';
 import AddToiletModal from './AddToiletModal';
 import Legend from './Legend';
 import '../styles/map.css';
