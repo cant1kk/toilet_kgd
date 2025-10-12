@@ -68,7 +68,7 @@ export function EnvironmentCheck() {
       
       // Показываем alert для проверки
       setTimeout(() => {
-        window.Telegram.WebApp.showAlert('Telegram WebApp initialized successfully!');
+        window.Telegram?.WebApp?.showAlert('Telegram WebApp initialized successfully!');
       }, 1000);
     }
   }, []);
