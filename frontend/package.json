@@ -32,12 +32,13 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "echo 'Starting build process...' && react-scripts build && echo 'Build completed successfully!'",
+    "build": "npx --yes react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "analyze": "npm run build && npx webpack-bundle-analyzer build/static/js/*.js",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "postinstall": "chmod +x node_modules/.bin/* 2>/dev/null || true"
   },
   "eslintConfig": {
     "extends": [
