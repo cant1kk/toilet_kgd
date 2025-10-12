@@ -9,7 +9,8 @@ import AdminPanel from './components/AdminPanel';
 import Navigation from './components/Navigation';
 import { GeolocationHandler } from './components/GeolocationHandler';
 import { SimpleMapTest } from './components/SimpleMapTest';
-import { telegramService } from './services/telegram';
+import { BasicTest } from './components/BasicTest';
+import { telegramService } from '../services/telegram';
 
 // Объявление типов для Telegram WebApp API
 declare global {
@@ -94,7 +95,7 @@ function AppContent() {
       <Routes>
         <Route 
           path="/" 
-          element={<SimpleMapTest initialUserLocation={userLocation} isTelegram={isTelegram} />} 
+          element={<BasicTest />} 
         />
         <Route 
           path="/admin" 
