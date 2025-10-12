@@ -17,7 +17,6 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
     const { latitude, longitude } = position.coords;
     onLocationUpdate(latitude, longitude);
     
-    // Показываем уведомление в Telegram
     if (telegramService.isTelegramApp()) {
       telegramService.notificationOccurred('success');
     }
@@ -40,76 +39,106 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
         break;
     }
     
+    setError(message);
+    
     if (telegramService.isTelegramApp()) {
       telegramService.showAlert(message);
       telegramService.notificationOccurred('error');
     }
   }, []);
 
-  useEffect(() => {
-    // Проверяем поддержку геолокации
-    if (!navigator.geolocation) {
+  const requestLocationWithTelegramButton = () => {
+    if (telegramService.isTelegramApp()) {
+      // Используем новый метод для показа кнопки геолокации
+      telegramService.showGeolocationButton(() => {
+        requestLocation();
+      });
+      
+      // Показываем инструкцию
+      telegramService.showAlert(
+        'Нажмите на синюю кнопку внизу "📍 Определить местоположение", чтобы мы могли показать ближайшие туалеты.'
+      );
+    } else {
+      requestLocation();
+    }
+  };
+
+  const requestLocation = async () => {
+    if (!telegramService.isGeolocationAvailable()) {
       setError('Ваш браузер не поддерживает геолокацию');
       setShowPermissionPrompt(true);
-      return;
-    }
-
-    // Проверяем, есть ли уже сохраненное разрешение
-    if ('permissions' in navigator) {
-      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
-        if (result.state === 'granted') {
-          // Если разрешение уже дано, запрашиваем геолокацию без показа модального окна
-          requestLocation(false);
-        } else if (result.state === 'prompt' && !hasBeenShown) {
-          // Показываем модальное окно только при первом запросе
-          setTimeout(() => {
-            setShowPermissionPrompt(true);
-            setHasBeenShown(true);
-          }, 1500);
-        }
-      }).catch(() => {
-        // Если API permissions не поддерживается, используем обычный подход
-        if (!hasBeenShown) {
-          setTimeout(() => {
-            requestLocation(true);
-            setHasBeenShown(true);
-          }, 1500);
-        }
-      });
-    } else {
-      // Для старых браузеров
-      if (!hasBeenShown) {
-        setTimeout(() => {
-          requestLocation(true);
-          setHasBeenShown(true);
-        }, 1500);
-      }
-    }
-  }, [hasBeenShown]);
-
-  const requestLocation = (showModalOnError: boolean = true) => {
-    if (!navigator.geolocation) {
-      setError('Ваш браузер не поддерживает геолокацию');
-      if (showModalOnError) setShowPermissionPrompt(true);
       return;
     }
 
     setIsLoading(true);
     setError('');
 
-    // Увеличиваем таймауты для мобильных устройств
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 25000, // 25 секунд для мобильных
-      maximumAge: 300000 // 5 минут кеширования
-    };
-
-    navigator.geolocation.getCurrentPosition(
-      handleLocationUpdate,
-      handleLocationError,
-      options
-    );
+    try {
+      // Используем специальный метод для Telegram
+      const position = await telegramService.requestGeolocation();
+      handleLocationUpdate(position);
+      setIsLoading(false);
+      setShowPermissionPrompt(false);
+      
+      // В Telegram скрываем главную кнопку после успеха
+      if (telegramService.isTelegramApp()) {
+        telegramService.hideMainButton();
+      }
+    } catch (error: any) {
+      handleLocationError(error);
+      setIsLoading(false);
+      
+      // В Telegram показываем кнопку повторного запроса при ошибке
+      if (telegramService.isTelegramApp()) {
+        telegramService.showRetryGeolocationButton(() => {
+          requestLocation();
+        });
+      }
+    }
   };
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setError('Ваш браузер не поддерживает геолокацию');
+      setShowPermissionPrompt(true);
+      return;
+    }
+
+    if (telegramService.isTelegramApp()) {
+      setTimeout(() => {
+        requestLocationWithTelegramButton();
+        setHasBeenShown(true);
+      }, 1000);
+      return;
+    }
+
+    if ('permissions' in navigator) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        if (result.state === 'granted') {
+          requestLocation();
+        } else if (result.state === 'prompt' && !hasBeenShown) {
+          setTimeout(() => {
+            setShowPermissionPrompt(true);
+            setHasBeenShown(true);
+          }, 1500);
+        }
+      }).catch(() => {
+        if (!hasBeenShown) {
+          setTimeout(() => {
+            requestLocation();
+            setHasBeenShown(true);
+          }, 1500);
+        }
+      });
+    } else {
+      if (!hasBeenShown) {
+        setTimeout(() => {
+          requestLocation();
+          setHasBeenShown(true);
+        }, 1500);
+      }
+    }
+  }, [hasBeenShown]);
 
   const getBrowserInstructions = () => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -139,7 +168,7 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
       return {
         title: 'Firefox',
         steps: [
-          'Нажмите на иконку замка слева от地址ной строки',
+          'Нажмите на иконку замка слева от адресной строки',
           'В разделе "Разрешения" найдите "Доступ к вашему местоположению"',
           'Измените на "Разрешить"',
           'Обновите страницу'
@@ -213,17 +242,17 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--tg-bg-color,#ffffff)] rounded-lg shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto border border-[var(--tg-hint-color,#999999)]">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-full">
               <MapPin className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-[var(--tg-text-color,#000000)]">
                 Включите геолокацию
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-[var(--tg-hint-color,#666666)] mt-1">
                 Чтобы мы могли показать ваше местоположение и ближайшие туалеты
               </p>
             </div>
@@ -248,14 +277,33 @@ export function GeolocationHandler({ onLocationUpdate }: GeolocationHandlerProps
         )}
 
         <div className="space-y-4">
-          <Button
-            onClick={() => requestLocation(true)}
-            className="w-full"
-            size="lg"
-            disabled={isLoading}
-          >
-            {isLoading ? '📍 Запрос геолокации...' : '📍 Разрешить доступ к местоположению'}
-          </Button>
+          {telegramService.isTelegramApp() ? (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <h4 className="font-medium text-blue-900 mb-2">
+                📱 Для Telegram:
+              </h4>
+              <p className="text-sm text-blue-800 mb-3">
+                Нажмите на синюю кнопкку внизу экрана "📍 Определить местоположение", чтобы предоставить доступ к вашему местоположению.
+              </p>
+              <Button
+                onClick={requestLocationWithTelegramButton}
+                className="w-full"
+                size="lg"
+                disabled={isLoading}
+              >
+                {isLoading ? '📍 Обработка...' : '📍 Показать кнопку Telegram'}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => requestLocation()}
+              className="w-full"
+              size="lg"
+              disabled={isLoading}
+            >
+              {isLoading ? '📍 Запрос геолокации...' : '📍 Разрешить доступ к местоположению'}
+            </Button>
+          )}
 
           <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
             <h4 className="font-medium text-gray-900 mb-2">

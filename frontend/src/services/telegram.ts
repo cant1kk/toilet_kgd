@@ -33,6 +33,7 @@ class TelegramService {
 
         WebApp.ready();
         WebApp.expand();
+        
         // Включаем подтверждение закрытия
         if (WebApp.enableClosingConfirmation) {
           WebApp.enableClosingConfirmation();
@@ -62,23 +63,28 @@ class TelegramService {
           });
         }
 
-        // Настройка главной кнопки
+        // Настройка главной кнопки с улучшенной поддержкой
         if (WebApp.MainButton && WebApp.MainButton.setParams) {
           WebApp.MainButton.setParams({
-            text: 'Закрыть',
-            color: WebApp.themeParams?.button_color || '#007bff'
+            text: 'Продолжить',
+            color: WebApp.themeParams?.button_color || '#007bff',
+            text_color: WebApp.themeParams?.button_text_color || '#ffffff'
           });
+          
+          // Устанавливаем обработчик по умолчанию
+          if (WebApp.MainButton.onClick) {
+            WebApp.MainButton.onClick(() => {
+              if (this.mainButtonCallback) {
+                this.mainButtonCallback();
+              } else {
+                WebApp.MainButton.hide();
+              }
+            });
+          }
         }
         
-        if (WebApp.MainButton && WebApp.MainButton.onClick) {
-          WebApp.MainButton.onClick(() => {
-            if (this.mainButtonCallback) {
-              this.mainButtonCallback();
-            } else {
-              if (WebApp.close) WebApp.close();
-            }
-          });
-        }
+        // Проверяем поддержку геолокации в Telegram
+        this.checkGeolocationSupport();
 
         // Адаптируем viewport для Telegram
         this.adaptViewport();
@@ -88,6 +94,22 @@ class TelegramService {
       } catch (error) {
         console.error('Failed to initialize Telegram WebApp:', error);
       }
+    }
+  }
+
+  private checkGeolocationSupport() {
+    // Проверяем, поддерживает ли Telegram WebApp геолокацию
+    if (navigator.geolocation) {
+      console.log('Geolocation is supported in this Telegram WebApp');
+      
+      // Проверяем HTTPS
+      if (location.protocol === 'https:' || location.hostname === 'localhost') {
+        console.log('Secure context detected - geolocation should work');
+      } else {
+        console.warn('Insecure context - geolocation may not work');
+      }
+    } else {
+      console.warn('Geolocation is not supported in this Telegram WebApp');
     }
   }
 
@@ -175,7 +197,7 @@ class TelegramService {
     }
   }
 
-  setMainButtonParams(params: { text?: string; color?: string }) {
+  setMainButtonParams(params: { text?: string; color?: string; text_color?: string }) {
     if (this.isInitialized && WebApp.MainButton && WebApp.MainButton.setParams) {
       WebApp.MainButton.setParams(params);
     }
@@ -297,8 +319,6 @@ class TelegramService {
     return window.innerHeight;
   }
 
-
-
   // Данные и события
   sendData(data: string) {
     if (this.isInitialized && WebApp.sendData) {
@@ -311,8 +331,6 @@ class TelegramService {
       WebApp.openInvoice(url, callback);
     }
   }
-
-
 
   setHeaderColor(color: `#${string}` | 'bg_color' | 'secondary_bg_color') {
     if (this.isInitialized && WebApp.setHeaderColor) {
@@ -351,6 +369,69 @@ class TelegramService {
       return WebApp.initData;
     }
     return null;
+  }
+
+  // Специальный метод для запроса геолокации в Telegram WebApp
+  requestGeolocation(): Promise<GeolocationPosition> {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Геолокация не поддерживается'));
+        return;
+      }
+
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 600000
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        resolve,
+        reject,
+        options
+      );
+    });
+  }
+
+  // Проверка доступности геолокации
+  isGeolocationAvailable(): boolean {
+    return !!navigator.geolocation;
+  }
+
+  // Показать кнопку для запроса геолокации
+  showGeolocationButton(callback: () => void) {
+    if (this.isInitialized && WebApp.MainButton) {
+      this.setMainButtonParams({
+        text: '📍 Определить местоположение',
+        color: '#007bff'
+      });
+      
+      this.setMainButtonCallback(() => {
+        callback();
+        // Скрываем кнопку после использования
+        setTimeout(() => {
+          this.hideMainButton();
+        }, 2000);
+      });
+      
+      this.showMainButton();
+    }
+  }
+
+  // Показать кнопку повторного запроса геолокации
+  showRetryGeolocationButton(callback: () => void) {
+    if (this.isInitialized && WebApp.MainButton) {
+      this.setMainButtonParams({
+        text: '🔄 Попробовать снова',
+        color: '#dc3545'
+      });
+      
+      this.setMainButtonCallback(() => {
+        callback();
+      });
+      
+      this.showMainButton();
+    }
   }
 }
 
